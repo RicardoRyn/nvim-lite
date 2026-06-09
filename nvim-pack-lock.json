@@ -84,6 +84,10 @@
       "rev": "1af6ffb9b5229a856e8090fa2f690e0931a5aace",
       "src": "https://github.com/jbyuki/one-small-step-for-vimkind"
     },
+    "outline.nvim": {
+      "rev": "2a132953b944561d45b52e4541ebfff71934a742",
+      "src": "https://github.com/hedyhli/outline.nvim"
+    },
     "promise-async": {
       "rev": "119e8961014c9bfaf1487bf3c2a393d254f337e2",
       "src": "https://github.com/kevinhwang91/promise-async"

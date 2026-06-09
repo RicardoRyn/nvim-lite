@@ -26,6 +26,7 @@ local specs = {
   { src = "https://github.com/nicolasgb/jj.nvim" },
   { src = "https://github.com/julienvincent/hunk.nvim" },
   { src = "https://github.com/MeanderingProgrammer/render-markdown.nvim" },
+  { src = "https://github.com/hedyhli/outline.nvim" },
 }
 
 vim.pack.add(specs)
