@@ -3,6 +3,20 @@ local M = {}
 ---@type number[]
 local buffer_order = {}
 
+local special_mode = require("utils.special_mode")
+if special_mode.is_active() then
+  M.get_buffer_order = function()
+    return {}
+  end
+  M.cycle = function() end
+  M.move = function() end
+  M.close_in_direction = function() end
+  M.pick_close = function() end
+  M.is_picking = false
+  M.pick_labels = {}
+  return M
+end
+
 local PICK_ALPHABET = "asdfghjklqwertyuiopzxcvbnm1234567890"
 
 M.pick_labels = {}

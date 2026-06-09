@@ -1,3 +1,5 @@
+local special_mode = require("utils.special_mode")
+
 local function augroup(name)
   return vim.api.nvim_create_augroup("ricardo_" .. name, { clear = true })
 end
@@ -10,6 +12,11 @@ vim.api.nvim_create_autocmd("BufEnter", {
 
     -- 1. 忽略非普通文件（例如终端、NvimTree、各种工具面板等）
     if vim.bo[buf].buftype ~= "" then
+      return
+    end
+
+    -- 1.5. 忽略 diff/merge 工具模式（hunk.nvim 的 DiffEditor/MergeEditor）
+    if special_mode.is_active() then
       return
     end
 
