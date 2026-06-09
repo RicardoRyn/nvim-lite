@@ -1,9 +1,7 @@
 ---@class LazySpec
 ---@field setup fun()                     Called once, on first trigger.
 ---@field keys? table[]                   Key specs: { mode, lhs, rhs, opts? }.
----@field cmd? string[]|table[]           Command specs.
----   String form:  "Telescope"           -- shadow cmd, triggers load then replays
----   Table form:   { "Telescope", fun(args), opts? }
+---@field cmd? string[]                   Plugin commands to lazy-load on, e.g. { "Outline" }.
 
 local M = {}
 
@@ -18,23 +16,16 @@ end
 
 local function cmd_loader(spec)
   for _, cmd in ipairs(spec.cmd or {}) do
-    if type(cmd) == "string" then
-      -- shadow command: catches the first invocation, loads the plugin, then replays.
-      vim.api.nvim_create_user_command(cmd, function(args)
+    -- Use CmdUndefined event: when user tries to execute a command that doesn't
+    -- exist, this autocmd fires, loads the plugin (which registers the real command),
+    -- and Neovim automatically retries the command.
+    vim.api.nvim_create_autocmd("CmdUndefined", {
+      pattern = cmd,
+      once = true,
+      callback = function()
         spec.load()
-        pcall(vim.api.nvim_del_user_command, cmd)
-        vim.cmd(cmd .. (args.args ~= "" and " " .. args.args or ""))
-      end, { desc = "[lazy] " .. cmd })
-    else
-      -- table form: { name, handler, opts }
-      local name = cmd[1]
-      local handler = cmd[2]
-      local opts = cmd[3] or {}
-      vim.api.nvim_create_user_command(name, function(args)
-        spec.load()
-        return handler(args)
-      end, opts)
-    end
+      end,
+    })
   end
 end
 
@@ -45,7 +36,7 @@ end
 ---   require("utils.lazy").load({
 ---     setup = function() require("telescope").setup({ ... }) end,
 ---     keys  = { { "n", "<leader>ff", function() ... end, { desc = "Find files" } } },
----     cmd   = { "Telescope", "FindFiles" },  -- or: { { "Telescope", handler, opts } }
+---     cmd   = { "Telescope" },
 ---   })
 ---
 ---@param spec LazySpec
