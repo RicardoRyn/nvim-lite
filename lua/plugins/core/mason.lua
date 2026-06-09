@@ -9,6 +9,9 @@ local my_languages = {
   -- rust
   "rust-analyzer",
   "codelldb",
+  -- MARKDOWN
+  "marksman", -- LSP (语法高亮、补全、跳转)
+  "prettierd", -- 格式化
 }
 
 require("mason").setup({

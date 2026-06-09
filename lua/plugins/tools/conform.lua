@@ -11,6 +11,15 @@ require("utils.lazy").load({
         python = { "ruff_organize_imports", "ruff_format" },
         -- rust
         rust = { "rustfmt" },
+        -- markdown
+        markdown = { "injected", "prettierd" },
+        quarto = { "injected" },
+        -- json
+        json = { "prettierd" },
+        jsonc = { "prettierd" },
+        -- yaml
+        yaml = { "prettierd" },
+        yml = { "prettierd" },
       },
       formatters = {
         miss_hit = { command = "mh_style", args = { "--fix", "$FILENAME" }, stdin = false, exit_codes = { 0, 1 } },
