@@ -1,32 +1,38 @@
 local specs = {
+  --core
   { src = "https://github.com/catppuccin/nvim", name = "catppuccin" },
-  { src = "https://github.com/neovim-treesitter/nvim-treesitter" },
-  { src = "https://github.com/neovim-treesitter/treesitter-parser-registry" },
-  { src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects" },
   { src = "https://github.com/mason-org/mason.nvim.git" },
-  { src = "https://github.com/neovim/nvim-lspconfig" },
+  { src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects" },
+  { src = "https://github.com/neovim-treesitter/nvim-treesitter" },
   { src = "https://github.com/folke/snacks.nvim" },
-  { src = "https://github.com/nvim-mini/mini.icons" },
-  { src = "https://github.com/nvim-mini/mini.surround" },
-  { src = "https://github.com/kevinhwang91/nvim-ufo.git" },
-  { src = "https://github.com/kevinhwang91/promise-async" },
-  { src = "https://github.com/rebelot/heirline.nvim" },
-  { src = "https://github.com/nvim-mini/mini.diff" },
-  { src = "https://github.com/folke/todo-comments.nvim" },
+  -- dap
+  { src = "https://github.com/igorlfs/nvim-dap-view" },
   { src = "https://github.com/mfussenegger/nvim-dap" },
   { src = "https://github.com/mfussenegger/nvim-dap-python" },
-  { src = "https://github.com/igorlfs/nvim-dap-view" },
   { src = "https://github.com/jbyuki/one-small-step-for-vimkind" },
-  { src = "https://github.com/zbirenbaum/copilot.lua" },
-  { src = "https://github.com/nvim-mini/mini.files" },
+  -- tools
   { src = "https://github.com/stevearc/conform.nvim" },
-  { src = "https://github.com/folke/sidekick.nvim" },
-  { src = "https://github.com/MunifTanjim/nui.nvim" },
+  { src = "https://github.com/zbirenbaum/copilot.lua" },
   { src = "https://github.com/folke/flash.nvim" },
+  { src = "https://github.com/nvim-mini/mini.files" },
+  { src = "https://github.com/nvim-mini/mini.surround" },
+  { src = "https://github.com/folke/sidekick.nvim" },
+  -- ui
+  { src = "https://github.com/rebelot/heirline.nvim" },
+  { src = "https://github.com/nvim-mini/mini.diff" },
+  { src = "https://github.com/nvim-mini/mini.icons" },
+  { src = "https://github.com/kevinhwang91/nvim-ufo.git" },
+  { src = "https://github.com/hedyhli/outline.nvim" },
+  { src = "https://github.com/folke/todo-comments.nvim" },
+  { src = "https://github.com/MeanderingProgrammer/render-markdown.nvim" },
+  -- vcs
   { src = "https://github.com/nicolasgb/jj.nvim" },
   { src = "https://github.com/julienvincent/hunk.nvim" },
-  { src = "https://github.com/MeanderingProgrammer/render-markdown.nvim" },
-  { src = "https://github.com/hedyhli/outline.nvim" },
+  -- dependencies
+  { src = "https://github.com/neovim/nvim-lspconfig" },
+  { src = "https://github.com/MunifTanjim/nui.nvim" },
+  { src = "https://github.com/kevinhwang91/promise-async" },
+  { src = "https://github.com/neovim-treesitter/treesitter-parser-registry" },
 }
 
 vim.pack.add(specs)

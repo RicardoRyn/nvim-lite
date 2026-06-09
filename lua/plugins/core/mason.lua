@@ -6,6 +6,11 @@ local my_languages = {
   "pyright",
   "debugpy",
   "ruff",
+  -- bash
+  "bash-language-server",
+  "shellcheck",
+  "shfmt",
+  "bash-debug-adapter",
   -- rust
   "rust-analyzer",
   "codelldb",
@@ -37,4 +42,6 @@ end
 
 vim.lsp.enable("lua_ls")
 vim.lsp.enable("pyright")
+vim.lsp.enable("bashls")
 vim.lsp.enable("rust_analyzer")
+vim.lsp.enable("marksman")

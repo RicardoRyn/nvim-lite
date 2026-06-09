@@ -69,5 +69,9 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
       end
     end, { desc = "Move current buffer to right" })
 
+    vim.keymap.set("n", "<leader>td", "<Cmd>tabclose<CR>", { desc = "Close Tab" })
+    vim.keymap.set("n", "<leader>ts", "<Cmd>tab split<CR>", { desc = "Tab Split" })
+    vim.keymap.set("n", "<leader>tn", "<Cmd>tabnew<CR>", { desc = "New Tab" })
+
   end,
 })

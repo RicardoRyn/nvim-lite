@@ -9,6 +9,9 @@ require("utils.lazy").load({
         lua = { "stylua" },
         -- python
         python = { "ruff_organize_imports", "ruff_format" },
+        -- bash
+        bash = { "shfmt" },
+        sh = { "shfmt" },
         -- rust
         rust = { "rustfmt" },
         -- markdown
