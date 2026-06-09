@@ -1,5 +1,5 @@
 local specs = {
-  { src = "https://github.com/catppuccin/nvim" },
+  { src = "https://github.com/catppuccin/nvim", name = "catppuccin" },
   { src = "https://github.com/neovim-treesitter/nvim-treesitter" },
   { src = "https://github.com/neovim-treesitter/treesitter-parser-registry" },
   { src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects" },

@@ -1,5 +1,9 @@
 {
   "plugins": {
+    "catppuccin": {
+      "rev": "0303a7208dba448c459767486a38a6ec05c4216b",
+      "src": "https://github.com/catppuccin/nvim"
+    },
     "conform.nvim": {
       "rev": "619363c30309d29ffa631e67c8183f2a72caa373",
       "src": "https://github.com/stevearc/conform.nvim"
@@ -47,10 +51,6 @@
     "nui.nvim": {
       "rev": "de740991c12411b663994b2860f1a4fd0937c130",
       "src": "https://github.com/MunifTanjim/nui.nvim"
-    },
-    "nvim": {
-      "rev": "0303a7208dba448c459767486a38a6ec05c4216b",
-      "src": "https://github.com/catppuccin/nvim"
     },
     "nvim-dap": {
       "rev": "531771530d4f82ad2d21e436e3cc052d68d7aebb",
