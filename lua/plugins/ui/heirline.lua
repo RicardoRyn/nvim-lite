@@ -6,7 +6,6 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
     local Align = { provider = "%=" }
     local Statusline = require("utils.heirline.statusline")
     local Tabline = require("utils.heirline.tabline")
-    local bc = require("utils.buffer_actions")
 
     require("heirline").setup({
       opts = {
@@ -45,11 +44,30 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
     vim.keymap.set("n", "<leader>bd", function() Snacks.bufdelete() end, { desc = "Buffer delete" })
     vim.keymap.set("n", "<leader>bo", function() Snacks.bufdelete.other() end, { desc = "Buffer delete other" })
 
+    vim.keymap.set("n", "<leader>bb", function() require("utils.buffer_actions").pick_close() end, { desc = "Pick buffer to close" })
     vim.keymap.set("n", "<leader>bl", function() require("utils.buffer_actions").close_in_direction("left") end, { desc = "Close buffers to the Left" })
     vim.keymap.set("n", "<leader>br", function() require("utils.buffer_actions").close_in_direction("right") end, { desc = "Close buffers to the Right" })
 
     vim.keymap.set("n", "<leader>b<", function() require("utils.buffer_actions").move(-1) end, { desc = "Move buffer left" })
     vim.keymap.set("n", "<leader>b>", function() require("utils.buffer_actions").move(1) end, { desc = "Move buffer right" })
+
+    vim.keymap.set("n", "<b", function()
+      local dir = -1
+      local moveBy = vim.v.count > 0 and vim.v.count or 1
+      local ba = require("utils.buffer_actions")
+      for _ = 1, moveBy do
+        ba.move(dir)
+      end
+    end, { desc = "Move current buffer to left" })
+
+    vim.keymap.set("n", ">b", function()
+      local dir = 1
+      local moveBy = vim.v.count > 0 and vim.v.count or 1
+      local ba = require("utils.buffer_actions")
+      for _ = 1, moveBy do
+        ba.move(dir)
+      end
+    end, { desc = "Move current buffer to right" })
 
   end,
 })

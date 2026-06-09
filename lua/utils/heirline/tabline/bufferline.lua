@@ -1,12 +1,25 @@
 vim.o.showtabline = 2
 local utils = require("heirline.utils")
+local colors = require("utils.heirline.colors")
 local FileIcon = require("utils.heirline.statusline.file_others").get_fileicon()
 
 local TablineBufnr = {
   provider = function(self)
-    return tostring(self.bufnr) .. ". "
+    local ok, ba = pcall(require, "utils.buffer_actions")
+    if ok and ba.is_picking then
+      return ba.pick_labels[self.bufnr] .. "."
+    else
+      return tostring(self.bufnr) .. "."
+    end
   end,
-  hl = "Comment",
+  hl = function()
+    local ok, ba = pcall(require, "utils.buffer_actions")
+    if ok and ba.is_picking then
+      return { fg = colors.red, bold = true }
+    else
+      return { fg = utils.get_highlight("Comment").fg }
+    end
+  end,
 }
 
 -- we redefine the filename component, as we probably only want the tail and not the relative path
@@ -157,11 +170,11 @@ end
 vim.api.nvim_create_autocmd({ "VimEnter", "UIEnter", "BufAdd", "BufDelete" }, {
   callback = function()
     vim.schedule(function()
-      local buffers = get_bufs()
-      for i, v in ipairs(buffers) do
+      local bufferline = get_bufs()
+      for i, v in ipairs(bufferline) do
         bufferline_cache[i] = v
       end
-      for i = #buffers + 1, #bufferline_cache do
+      for i = #bufferline + 1, #bufferline_cache do
         bufferline_cache[i] = nil
       end
     end)

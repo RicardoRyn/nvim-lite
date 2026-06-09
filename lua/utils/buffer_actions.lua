@@ -1,14 +1,20 @@
 local M = {}
 
----@type number[]  the order of buffers (listed, valid)
+---@type number[]
 local buffer_order = {}
 
----@return string|nil  session file path, or nil if the session file does not exist
+local PICK_ALPHABET = "asdfghjklqwertyuiopzxcvbnm1234567890"
+
+M.pick_labels = {}
+
+M.is_picking = false
+
+---@return string|nil
 local function get_session_file()
-  local sep = vim.fn.has("win32") == 1 and "\\" or "/"
-  local session_dir = vim.fn.stdpath("state") .. sep .. "sessions"
+  local session_dir = vim.fs.joinpath(vim.fn.stdpath("state"), "sessions")
   local fname = vim.fn.substitute(vim.fn.getcwd(), "[/\\\\:]", "%%", "g") .. ".vim"
-  local path = session_dir .. sep .. fname
+  local path = vim.fs.joinpath(session_dir, fname)
+
   if vim.fn.filereadable(path) == 1 then
     return path
   else
@@ -35,7 +41,7 @@ local function save_buffer_order()
   vim.g.BufferOrder = vim.json.encode(names)
 end
 
----@param buf number
+---@param bufnr number
 local function add_buffer_to_buffer_order(bufnr)
   if vim.fn.buflisted(bufnr) == 0 then
     return
@@ -51,7 +57,7 @@ local function add_buffer_to_buffer_order(bufnr)
   save_buffer_order()
 end
 
----@param buf number
+---@param bufnr number
 local function remove_buffer_from_buffer_order(bufnr)
   for i, b in ipairs(buffer_order) do
     if b == bufnr then
@@ -64,13 +70,44 @@ local function remove_buffer_from_buffer_order(bufnr)
   end
 end
 
----@param buf number
-local function close_buffer(buf)
+local function assign_pick_letters()
+  M.pick_labels = {}
+  local used = {}
+
+  for _, bufnr in ipairs(buffer_order) do
+    local name = buf_to_name(bufnr)
+    local filename = name ~= "" and vim.fn.fnamemodify(name, ":t") or ""
+    local first_char = filename:sub(1, 1):lower()
+
+    local label = nil
+
+    if first_char ~= "" and not used[first_char] and PICK_ALPHABET:find(first_char, 1, true) then
+      -- if the first char is not uesd and belong to PICK_ALPHABET
+      label = first_char
+    else
+      -- if not, find the first unused char in PICK_ALPHABET
+      for c in PICK_ALPHABET:gmatch(".") do
+        if not used[c] then
+          label = c
+          break
+        end
+      end
+    end
+
+    if label then
+      M.pick_labels[bufnr] = label
+      used[label] = true
+    end
+  end
+end
+
+---@param bufnr number
+local function close_buffer(bufnr)
   local ok_snacks, snacks_bufdelete = pcall(Snacks, "bufdelete")
   if ok_snacks then
-    snacks_bufdelete(buf)
+    snacks_bufdelete(bufnr)
   else
-    pcall(vim.api.nvim_buf_delete, buf, { force = false })
+    pcall(vim.api.nvim_buf_delete, bufnr, { force = false })
   end
 end
 
@@ -98,6 +135,7 @@ local function init()
   end
 end
 
+---Move the buffer to the left or right in the buffer order.
 ---@param direction number  1: right, -1: left
 function M.move(direction)
   local current_bufnr = vim.api.nvim_get_current_buf()
@@ -123,6 +161,7 @@ function M.move(direction)
   save_buffer_order()
 end
 
+---Cycle to the next/prev buffer in the given direction.
 ---@param direction number  1: right, -1: left
 function M.cycle(direction)
   local current_buf = vim.api.nvim_get_current_buf()
@@ -143,6 +182,7 @@ function M.cycle(direction)
   end
 end
 
+---Close all buffers to the left or right of the current buffer in the buffer order.
 ---@alias Direction "'left'" | "'right'"
 ---@param direction Direction
 function M.close_in_direction(direction)
@@ -175,6 +215,35 @@ function M.close_in_direction(direction)
   end
 end
 
+---Pick a buffer to close.
+function M.pick_close()
+  if M.is_picking then
+    return
+  end
+
+  assign_pick_letters()
+  M.is_picking = true
+  vim.api.nvim_exec_autocmds("User", { pattern = "BufferOrderChanged", modeline = false })
+
+  -- wait for user to input char
+  local ok, char_ascii = pcall(vim.fn.getchar)
+
+  if ok and char_ascii then
+    local input_char = vim.fn.nr2char(char_ascii):lower()
+    for bufnr, label in pairs(M.pick_labels) do
+      if label == input_char then
+        close_buffer(bufnr)
+        break
+      end
+    end
+  end
+
+  M.is_picking = false
+  M.pick_labels = {}
+  vim.api.nvim_exec_autocmds("User", { pattern = "BufferOrderChanged", modeline = false })
+end
+
+---Get the current buffer order.
 function M.get_buffer_order()
   return buffer_order
 end
