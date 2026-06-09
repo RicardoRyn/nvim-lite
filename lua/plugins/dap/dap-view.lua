@@ -1,15 +1,28 @@
 local dap
 local widgets
 
-require("utils.lazy.key_loader")({
+require("utils.lazy").load({
   setup = function()
     dap = require("dap")
     widgets = require("dap.ui.widgets")
 
     local icon = require("utils.icons").dap
-    vim.fn.sign_define("DapStopped", { text = icon.Stopped, texthl = "DapUIBreakpointsCurrentLine", linehl = "RedrawDebugComposed", numhl = "DapUIBreakpointsCurrentLine", })
-    vim.fn.sign_define("DapBreakpoint", { text = icon.BreakpointData, texthl = "DapBreakpoint", linehl = "RedrawDebugRecompose", numhl = "DapBreakpoint" })
-    vim.fn.sign_define("DapBreakpointCondition", { text = icon.BreakpointConditional, texthl = "DapBreakpointCondition", linehl = "RedrawDebugClear", numhl = "DapBreakpointCondition", })
+    vim.fn.sign_define("DapStopped", {
+      text = icon.Stopped,
+      texthl = "DapUIBreakpointsCurrentLine",
+      linehl = "RedrawDebugComposed",
+      numhl = "DapUIBreakpointsCurrentLine",
+    })
+    vim.fn.sign_define(
+      "DapBreakpoint",
+      { text = icon.BreakpointData, texthl = "DapBreakpoint", linehl = "RedrawDebugRecompose", numhl = "DapBreakpoint" }
+    )
+    vim.fn.sign_define("DapBreakpointCondition", {
+      text = icon.BreakpointConditional,
+      texthl = "DapBreakpointCondition",
+      linehl = "RedrawDebugClear",
+      numhl = "DapBreakpointCondition",
+    })
     require("dap-view").setup({
       winbar = {
         sections = { "watches", "scopes", "exceptions", "breakpoints", "threads", "repl", "console" },
@@ -51,12 +64,10 @@ require("utils.lazy.key_loader")({
       auto_toggle = true,
     })
   end,
+  -- stylua: ignore
   keys = {
     { "n", "<leader>db", function() dap.toggle_breakpoint() end, { desc = "Breakpoint" } },
-    { "n", "<leader>dB", function()
-      local input = vim.fn.input("Condition for breakpoint:")
-      dap.set_breakpoint(input)
-    end, { desc = "Conditional Breakpoint" } },
+    { "n", "<leader>dB", function() local input = vim.fn.input("Condition for breakpoint:") dap.set_breakpoint(input) end, { desc = "Conditional Breakpoint" } },
     { "n", "<leader>dc", function() dap.run_to_cursor() end, { desc = "Run to Cursor" } },
     { "n", "<leader>dC", function() dap.clear_breakpoints() end, { desc = "Clear Breakpoints" } },
     { "n", "<leader>dd", function() dap.disconnect({ terminateDebuggee = true }, function() dap.close() end) end, { desc = " Disconnect (Terminate Debuggee)" } },
@@ -84,16 +95,24 @@ require("utils.lazy.key_loader")({
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "dap-view", "dap-repl", "terminal" },
   callback = function(ev)
-    vim.keymap.set("n", "<S-h>", function () require("dap-view").navigate({count = -1, wrap = false, type = "views"}) end, { buffer = ev.buf, desc = "Views prev" })
-    vim.keymap.set("n", "<S-l>", function () require("dap-view").navigate({count = 1, wrap = false, type = "views"}) end, { buffer = ev.buf, desc = "Views next" })
+    vim.keymap.set("n", "<S-h>", function()
+      require("dap-view").navigate({ count = -1, wrap = false, type = "views" })
+    end, { buffer = ev.buf, desc = "Views prev" })
+    vim.keymap.set("n", "<S-l>", function()
+      require("dap-view").navigate({ count = 1, wrap = false, type = "views" })
+    end, { buffer = ev.buf, desc = "Views next" })
   end,
 })
 vim.api.nvim_create_autocmd("BufEnter", {
-    pattern = "*",
-    callback = function(ev)
-        if vim.bo[ev.buf].buftype == "terminal" then
-            vim.keymap.set("n", "<S-h>", function () require("dap-view").navigate({count = -1, wrap = false, type = "views"}) end, { buffer = ev.buf })
-            vim.keymap.set("n", "<S-l>", function () require("dap-view").navigate({count = 1, wrap = false, type = "views"}) end, { buffer = ev.buf })
-        end
-    end,
+  pattern = "*",
+  callback = function(ev)
+    if vim.bo[ev.buf].buftype == "terminal" then
+      vim.keymap.set("n", "<S-h>", function()
+        require("dap-view").navigate({ count = -1, wrap = false, type = "views" })
+      end, { buffer = ev.buf })
+      vim.keymap.set("n", "<S-l>", function()
+        require("dap-view").navigate({ count = 1, wrap = false, type = "views" })
+      end, { buffer = ev.buf })
+    end
+  end,
 })

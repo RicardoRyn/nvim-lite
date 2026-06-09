@@ -1,4 +1,4 @@
-require("utils.lazy.key_loader")({
+require("utils.lazy").load({
   setup = function()
     require("mini.files").setup({
       content = {
@@ -21,7 +21,21 @@ require("utils.lazy.key_loader")({
     })
   end,
   keys = {
-    { "n", "<leader>ee", function() MiniFiles.open() end, { desc = "Mini Files" } },
-    { "n", "<leader>ef", function() MiniFiles.open(vim.api.nvim_buf_get_name(0)) end, { desc = "Mini Files (Current folder)" } },
+    {
+      "n",
+      "<leader>ee",
+      function()
+        MiniFiles.open()
+      end,
+      { desc = "Mini Files" },
+    },
+    {
+      "n",
+      "<leader>ef",
+      function()
+        MiniFiles.open(vim.api.nvim_buf_get_name(0))
+      end,
+      { desc = "Mini Files (Current folder)" },
+    },
   },
 })

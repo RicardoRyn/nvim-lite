@@ -1,4 +1,4 @@
-require("utils.lazy.key_loader")({
+require("utils.lazy").load({
   setup = function()
     require("conform").setup({
       notify_on_error = false,

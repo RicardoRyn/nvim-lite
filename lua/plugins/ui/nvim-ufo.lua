@@ -3,7 +3,7 @@ vim.o.foldlevel = 99
 vim.o.foldlevelstart = 99
 vim.o.foldenable = true
 
-local ensure = require("utils.lazy.key_loader")({
+local load = require("utils.lazy").load({
   setup = function()
     require("ufo").setup({
       preview = {
@@ -62,5 +62,5 @@ local ensure = require("utils.lazy.key_loader")({
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   group = vim.api.nvim_create_augroup("NvimUfo", { clear = true }),
   once = true,
-  callback = ensure,
+  callback = load,
 })

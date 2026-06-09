@@ -125,7 +125,7 @@ local function two_char_jump(opts)
   })
 end
 
-require("utils.lazy.key_loader")({
+require("utils.lazy").load({
   setup = function()
     vim.api.nvim_set_hl(0, "FlashLabel", { fg = "#ff007c", bold = true })
     require("flash").setup({
