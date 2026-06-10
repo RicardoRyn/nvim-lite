@@ -17,6 +17,7 @@ local specs = {
   { src = "https://github.com/nvim-mini/mini.files" },
   { src = "https://github.com/nvim-mini/mini.surround" },
   { src = "https://github.com/folke/sidekick.nvim" },
+  { src = "https://github.com/linux-cultist/venv-selector.nvim" },
   -- ui
   { src = "https://github.com/rebelot/heirline.nvim" },
   { src = "https://github.com/nvim-mini/mini.diff" },
