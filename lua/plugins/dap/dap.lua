@@ -1,6 +1,6 @@
 vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("SetupDap", { clear = true }),
-  pattern = { "lua", "python", "rust", "bash" },
+  pattern = { "lua", "python", "rust", "bash", "sh" },
   once = true,
   callback = function()
     local dap = require("dap")

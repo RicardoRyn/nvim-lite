@@ -97,3 +97,5 @@ end, {
 vim.keymap.set("n", "<leader>P", "<cmd>PackStatus<cr>", { desc = "Pack status" })
 
 load_plugins()
+
+-- TODO: need sync
