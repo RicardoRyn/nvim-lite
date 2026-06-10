@@ -30,7 +30,7 @@
     },
     "mason.nvim": {
       "rev": "16ba83bfc8a25f52bb545134f5bee082b195c460",
-      "src": "https://github.com/mason-org/mason.nvim.git"
+      "src": "https://github.com/mason-org/mason.nvim"
     },
     "mini.diff": {
       "rev": "5af2b6be4a4beb673f3196a414f6fd932bbedd48",
@@ -78,7 +78,7 @@
     },
     "nvim-ufo": {
       "rev": "ab3eb124062422d276fae49e0dd63b3ad1062cfc",
-      "src": "https://github.com/kevinhwang91/nvim-ufo.git"
+      "src": "https://github.com/kevinhwang91/nvim-ufo"
     },
     "one-small-step-for-vimkind": {
       "rev": "1af6ffb9b5229a856e8090fa2f690e0931a5aace",
