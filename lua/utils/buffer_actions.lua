@@ -125,6 +125,24 @@ local function close_buffer(bufnr)
   end
 end
 
+local function reconcile()
+  -- fileter out invalid or unlisted buffers
+  buffer_order = vim.tbl_filter(function(bufnr)
+    return vim.fn.buflisted(bufnr) == 1
+  end, buffer_order)
+
+  -- add any listed buffers that are not in buffer_order
+  local listed_bufnr = {}
+  for _, bufnr in ipairs(buffer_order) do
+    listed_bufnr[bufnr] = true -- Avoid nested loops that would cause O(n^2) time complexity
+  end
+  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.fn.buflisted(bufnr) == 1 and not listed_bufnr[bufnr] then
+      buffer_order[#buffer_order + 1] = bufnr
+    end
+  end
+end
+
 local function init()
   local raw = vim.g.BufferOrder
   if not raw then
@@ -135,7 +153,9 @@ local function init()
         if line:match("^badd") then
           local name = vim.fn.fnamemodify(vim.fn.expand(line:match("%S+$")), ":p")
           local bufnr = vim.fn.bufnr(name)
-          table.insert(buffer_order, bufnr)
+          if bufnr ~= -1 then
+            table.insert(buffer_order, bufnr)
+          end
         end
       end
     end
@@ -144,9 +164,13 @@ local function init()
     local names = vim.json.decode(raw)
     for _, name in ipairs(names) do
       local bufnr = vim.fn.bufnr(name)
-      table.insert(buffer_order, bufnr)
+      if bufnr ~= -1 then
+        table.insert(buffer_order, bufnr)
+      end
     end
   end
+
+  reconcile()
 end
 
 ---Move the buffer to the left or right in the buffer order.

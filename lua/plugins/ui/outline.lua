@@ -1,6 +1,5 @@
 require("utils.lazy").load({
   setup = function()
-    dd("outline loaded")
     require("outline").setup()
   end,
   keys = {
