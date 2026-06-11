@@ -8,3 +8,6 @@ require("catppuccin").setup({
 })
 
 vim.cmd.colorscheme("catppuccin")
+if vim.o.background == "light" then
+  vim.api.nvim_set_hl(0, "CursorLine", { bg = "#dddddd" })
+end
