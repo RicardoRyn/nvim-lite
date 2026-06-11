@@ -1,5 +1,6 @@
 require("utils.lazy").load({
   setup = function()
+    dd("VenvSelect loaded")
     require("venv-selector").setup({
       search = {
         anaconda_base = {
