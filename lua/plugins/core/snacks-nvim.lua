@@ -99,6 +99,23 @@ vim.keymap.set("n", "<leader>n", function() Snacks.notifier.show_history() end, 
 vim.keymap.set("n", "<leader>un", function() Snacks.notifier.hide() end, { desc = "Dismiss notifications" })
 vim.keymap.set("n", "<leader>es", function() Snacks.explorer() end, { desc = "Files explorer" })
 vim.keymap.set("n", "<leader>uc", function() Snacks.picker.colorschemes() end, { desc = "Select colorschemes" })
+-- dev
+vim.keymap.set({ "n", "v" }, "<leader>Dr", function() Snacks.debug.run() end, { desc = "Snacks run lua" })
+vim.keymap.set({ "n", "v" }, "<leader>Dm", function() Snacks.debug.metrics() end, { desc = "Snacks metrics" })
+vim.keymap.set("n", "<leader>Ds", function()
+  local input = vim.fn.input("Enter value to measure: ")
+  if input == "" then
+    vim.notify("Cancelled or empty input", vim.log.levels.WARN)
+    return
+  end
+  local num = tonumber(input)
+  if num == nil then
+    vim.notify("Invalid number: " .. input, vim.log.levels.ERROR)
+    return
+  end
+  local measured = Snacks.debug.size(num)
+  vim.notify(measured)
+end, { desc = "Snacks size" })
 
 -- Create some toggle mappings
 Snacks.toggle.option("background", { off = "light", on = "dark", name = "background" }):map("<leader>ub")

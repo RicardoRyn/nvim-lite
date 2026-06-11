@@ -49,7 +49,8 @@ miniclue.setup({
 
     { mode = "n", keys = "<Leader>a", desc = "AI" },
     { mode = "n", keys = "<Leader>b", desc = "Buffer" },
-    { mode = "n", keys = "<Leader>d", desc = "Debug" },
+    { mode = "n", keys = "<Leader>D", desc = "Debug snacks" },
+    { mode = "n", keys = "<Leader>d", desc = "DAP" },
     { mode = "n", keys = "<Leader>e", desc = "Files" },
     { mode = "n", keys = "<Leader>f", desc = "Find" },
     { mode = "n", keys = "<Leader>g", desc = "Git" },
