@@ -15,7 +15,7 @@ vim.keymap.set(
   "n",
   "<leader>ur",
   "<Cmd>nohlsearch<Bar>diffupdate<Bar>normal! <C-L><CR>",
-  { desc = "Redraw / Clear hlsearch / Diff Update" }
+  { desc = "UI redraw" }
 )
 vim.keymap.set({ "i" }, "jk", "<Esc>", { desc = "Exit insert mode" })
 vim.keymap.set({ "n", "v" }, "j", "gj", { desc = "Next visual line" })

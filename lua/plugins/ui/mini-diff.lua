@@ -63,6 +63,6 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 
     vim.keymap.set({ "n", "v" }, "<leader>gp", function()
       require("mini.diff").toggle_overlay()
-    end, { desc = "Preview Hunk" })
+    end, { desc = "Git preview" })
   end,
 })

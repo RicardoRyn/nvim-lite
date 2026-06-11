@@ -20,6 +20,7 @@ local active_specs = {
   { src = "https://github.com/linux-cultist/venv-selector.nvim" },
   -- ui
   { src = "https://github.com/rebelot/heirline.nvim" },
+  { src = "https://github.com/nvim-mini/mini.clue" },
   { src = "https://github.com/nvim-mini/mini.diff" },
   { src = "https://github.com/nvim-mini/mini.icons" },
   { src = "https://github.com/kevinhwang91/nvim-ufo" },

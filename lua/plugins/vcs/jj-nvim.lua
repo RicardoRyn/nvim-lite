@@ -38,6 +38,6 @@ require("utils.lazy").load({
     { "n", "<leader>jtd", function() require("jj.cmd").tag_delete() end, { desc = "JJ tag delete", } },
     { "n", "<leader>jtp", function() require("jj.cmd").tag_push() end, { desc = "JJ tag push", } },
     { "n", "<leader>jU", function() require("jj.cmd").undo() end, { desc = "JJ undo" } },
-    { "n", "<leader>sj", function() require("jj.picker").status() end, { desc = "JJ Picker status" } },
+    { "n", "<leader>sj", function() require("jj.picker").status() end, { desc = "Search diff files" } },
   },
 })

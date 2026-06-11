@@ -27,7 +27,7 @@ require("utils.lazy").load({
       function()
         MiniFiles.open()
       end,
-      { desc = "Mini Files" },
+      { desc = "Files" },
     },
     {
       "n",
@@ -35,7 +35,7 @@ require("utils.lazy").load({
       function()
         MiniFiles.open(vim.api.nvim_buf_get_name(0))
       end,
-      { desc = "Mini Files (Current folder)" },
+      { desc = "Files in current folder" },
     },
   },
 })

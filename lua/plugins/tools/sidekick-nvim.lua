@@ -64,7 +64,7 @@ require("utils.lazy").load({
       function()
         require("sidekick.cli").toggle()
       end,
-      { desc = "Sidekick Toggle" },
+      { desc = "Sidekick toggle" },
     },
     {
       "n",
@@ -72,7 +72,7 @@ require("utils.lazy").load({
       function()
         require("sidekick.cli").toggle()
       end,
-      { desc = "Sidekick Toggle CLI" },
+      { desc = "Sidekick toggle" },
     },
     {
       "n",
@@ -80,7 +80,7 @@ require("utils.lazy").load({
       function()
         require("sidekick.cli").select({ filter = { installed = true } })
       end,
-      { desc = "Select CLI" },
+      { desc = "Sidekick select" },
     },
     {
       "n",
@@ -88,7 +88,7 @@ require("utils.lazy").load({
       function()
         require("sidekick.cli").close()
       end,
-      { desc = "Detach a CLI Session" },
+      { desc = "Sidekick detach" },
     },
     {
       { "x", "n" },
@@ -96,7 +96,7 @@ require("utils.lazy").load({
       function()
         require("sidekick.cli").send({ msg = "{this}" })
       end,
-      { desc = "Send This" },
+      { desc = "Sidekick send this" },
     },
     {
       "n",
@@ -104,7 +104,7 @@ require("utils.lazy").load({
       function()
         require("sidekick.cli").send({ msg = "{file}" })
       end,
-      { desc = "Send File" },
+      { desc = "Sidekick send file" },
     },
     {
       "x",
@@ -112,7 +112,7 @@ require("utils.lazy").load({
       function()
         require("sidekick.cli").send({ msg = "{selection}" })
       end,
-      { desc = "Send Visual Selection" },
+      { desc = "Sidekick send visual selection" },
     },
     {
       { "n", "x" },
@@ -120,7 +120,7 @@ require("utils.lazy").load({
       function()
         require("sidekick.cli").prompt()
       end,
-      { desc = "Sidekick Select Prompt" },
+      { desc = "Sidekick select prompt" },
     },
   },
 })

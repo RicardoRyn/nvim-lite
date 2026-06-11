@@ -75,7 +75,7 @@ require("utils.lazy").load({
           end
         end)
       end,
-      { desc = "Code Format" },
+      { desc = "LSP format" },
     },
   },
 })
