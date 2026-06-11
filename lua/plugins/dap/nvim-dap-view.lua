@@ -51,7 +51,7 @@ require("utils.lazy").load({
             :totable()) > 1 and "below" or "right"
         end,
         size = function(pos)
-          return pos == "below" and 0.25 or 0.3
+          return pos == "below" and 0.25 or 0.5
         end,
         terminal = {
           -- `pos` is the position for the regular window
