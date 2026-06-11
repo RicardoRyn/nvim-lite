@@ -23,16 +23,18 @@ M = {
   end,
 
   provider = function(self)
-    if self.source == "workspace" or self.source == "cwd" then
-      if self.workspace_path == nil then
-        return ""
+    if self.python ~= nil and self.python ~= "" then
+      local parts = vim.split(vim.fs.normalize(self.python), "/")
+      if self.source == "workspace" or self.source == "cwd" then
+        local name = parts[#parts - 3]
+        return " " .. name .. " "
+      elseif self.source == "anaconda_base" then
+        local name = parts[#parts - 1]
+        return " " .. name .. " "
       end
-      return " " .. vim.fs.basename(vim.fs.normalize(self.workspace_path)) .. " "
-    elseif self.source == "anaconda_base" then
-      return " " .. vim.fs.basename(vim.fs.dirname(vim.fs.normalize(self.python))) .. " "
+      return self.python or ""
     end
-
-    return self.python or ""
+    return ""
   end,
 
   hl = function(self)
