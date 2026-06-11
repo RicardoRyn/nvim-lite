@@ -4,15 +4,7 @@ require("catppuccin").setup({
     light = "latte",
     dark = "mocha",
   },
-  transparent_background = false,
-  float = {
-    transparent = true,
-    solid = true,
-  },
   auto_integrations = true,
-  integrations = {
-    avante = false,
-  },
 })
 
 vim.cmd.colorscheme("catppuccin")

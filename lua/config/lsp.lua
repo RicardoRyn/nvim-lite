@@ -10,7 +10,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
     })
 
     -- complete
-    vim.opt.completeopt = { "menu", "menuone", "noinsert", "noselect", "fuzzy" }
+    vim.opt.completeopt = { "fuzzy", "menu", "menuone", "noinsert", "noselect", "popup" }
     vim.opt.complete:append("o")
     vim.api.nvim_create_autocmd({ "BufEnter", "InsertEnter", "FileType" }, {
       group = vim.api.nvim_create_augroup("AutocompleteFilter", { clear = true }),
@@ -28,10 +28,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
     if client:supports_method("textDocument/completion") and vim.lsp.completion then
       vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
     end
-    vim.opt.wildoptions = "pum,fuzzy"
-    vim.opt.wildmode = "noselect:lastused"
+    vim.opt.pumblend = 0 -- menu transparency
+    vim.opt.pumborder = "single"
 
-    -- show map in cmdline
+    -- cmdline complete
+    vim.opt.wildoptions = "fuzzy,pum"
+    vim.opt.wildmode = "noselect:lastused"
     local cmdline_cmp_group = vim.api.nvim_create_augroup("NativeCmdlineCmp", { clear = true })
     vim.api.nvim_create_autocmd("CmdlineChanged", {
       group = cmdline_cmp_group,
