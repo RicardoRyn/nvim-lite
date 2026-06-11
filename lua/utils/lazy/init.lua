@@ -7,10 +7,24 @@ local M = {}
 
 local function key_loader(spec)
   for _, key in ipairs(spec.keys or {}) do
-    vim.keymap.set(key[1], key[2], function()
-      spec.load()
-      return key[3]()
-    end, key[4] or {})
+    if type(key[3]) == "string" then
+      local rhs = key[3]
+      local opts = key[4] or {}
+      vim.keymap.set(key[1], key[2], function()
+        spec.load()
+        if opts.expr then
+          return rhs
+        end
+        local keys = vim.api.nvim_replace_termcodes(rhs, true, true, true)
+        local mode = opts.remap and "m" or "n"
+        vim.api.nvim_feedkeys(keys, mode, false)
+      end, opts)
+    else
+      vim.keymap.set(key[1], key[2], function()
+        spec.load()
+        return key[3]()
+      end, key[4] or {})
+    end
   end
 end
 

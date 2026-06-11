@@ -3,7 +3,7 @@ require("utils.lazy").load({
     require("outline").setup()
   end,
   keys = {
-    { "n", "<leader>o", function () vim.cmd("Outline") end, { desc = "Outline" } },
+    { "n", "<leader>o", "<cmd>Outline<cr>", { desc = "Outline" } },
   },
   cmd = { "Outline" }
 })

@@ -84,7 +84,6 @@ vim.keymap.set("n", "gr", function() Snacks.picker.lsp_references() end, { nowai
 vim.keymap.set("n", "gI", function() Snacks.picker.lsp_implementations() end, { desc = "Goto Implementation" })
 vim.keymap.set("n", "gy", function() Snacks.picker.lsp_type_definitions() end, { desc = "Goto T[y]pe Definition" })
 -- git
-vim.keymap.set({ "n", "v" }, "<leader>gg", function() Snacks.gitbrowse.open() end, { desc = "Github Browse" })
 vim.keymap.set("n", "<leader>ghi", function() Snacks.picker.gh_issue() end, { desc = "GitHub Issues (open)" })
 vim.keymap.set("n", "<leader>ghI", function() Snacks.picker.gh_issue({ state = "all" }) end, { desc = "GitHub Issues (all)" })
 vim.keymap.set("n", "<leader>ghp", function() Snacks.picker.gh_pr() end, { desc = "GitHub Pull Requests (open)" })
