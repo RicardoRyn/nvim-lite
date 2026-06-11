@@ -23,6 +23,7 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
         Statusline.cmdline.SelectionCount,
         Statusline.cmdline.SearchCount,
         Statusline.dap_messages,
+        Statusline.python_venv,
         Statusline.ai,
         Statusline.lsp.LSPActive,
         Statusline.diagnostics,

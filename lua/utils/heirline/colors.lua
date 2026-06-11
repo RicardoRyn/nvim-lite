@@ -13,6 +13,7 @@ local function get_colors()
     blue = utils.get_highlight("Function").fg,
     gray = utils.get_highlight("NonText").fg,
     orange = utils.get_highlight("Constant").fg,
+    yellow = utils.get_highlight("Type").fg,
     purple = utils.get_highlight("Statement").fg,
     cyan = utils.get_highlight("Special").fg,
     diag_warn = utils.get_highlight("DiagnosticWarn").fg,
