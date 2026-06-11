@@ -2,7 +2,7 @@ local miniclue = require("mini.clue")
 
 miniclue.setup({
   window = {
-    delay = 100,
+    delay = 300,
     config = {
       -- Compute window width automatically
       width = "auto",

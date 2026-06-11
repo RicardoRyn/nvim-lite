@@ -6,13 +6,10 @@ local fname = vim.fn.substitute(vim.fn.getcwd(), "[/\\\\:]", "%%", "g") .. ".vim
 local session_file = vim.fs.joinpath(session_dir, fname)
 
 local function cleanup_jj_temp_files()
-  -- remove_jjdescription_from_args
+  -- remove file from args
   local argv = vim.fn.argv()
   for i = #argv, 1, -1 do
-    -- traverse backwards to avoid index shifting when deleting
-    if argv[i]:match("editor.-%.jjdescription$") then
-      vim.cmd("argdelete " .. argv[i])
-    end
+    vim.cmd("argdelete " .. argv[i])
   end
 
   -- delete any .jjdescription buffers that might be open
