@@ -163,4 +163,6 @@ sync(active_specs, disabled_specs)
 
 load_plugins()
 
-vim.keymap.set("n", "<leader>P", "<cmd>PackStatus<cr>", { desc = "Pack status" })
+vim.keymap.set("n", "<leader>Ps", "<cmd>PackStatus<cr>", { desc = "Pack status" })
+vim.keymap.set("n", "<leader>Pu", "<cmd>PackUpdate<cr>", { desc = "Pack update" })
+vim.keymap.set("n", "<leader>PU", "<cmd>PackUpdate!<cr>", { desc = "Pack update (no confirmation)" })
