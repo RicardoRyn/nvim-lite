@@ -4,55 +4,39 @@ local M = {}
 -- Constants
 -----------------------------------------------------------------------------
 local NS = vim.api.nvim_create_namespace("csvview")
-local BORDER_CHAR = "│"
-local BORDER_CHAR_WIDTH = 1 -- display width of │
 local DEFAULT_DELIMITERS = { ",", "\t", ";", "|", ":" }
-local DEFAULT_QUOTE_CHARS = { '"', "'" }
+local DEFAULT_QUOTE_CHAR = '"'
+
+-----------------------------------------------------------------------------
+-- User config
+-----------------------------------------------------------------------------
+local config = {
+  border_char = "│",
+  left_spacing = 0, -- spaces between delimiter and field (left side)
+  right_spacing = 0, -- spaces between field and delimiter (right side)
+}
 
 -----------------------------------------------------------------------------
 -- State per buffer
 -----------------------------------------------------------------------------
-local buffer_states = {} ---@type table<integer, table>
+---@type table<integer, table>
+local buffer_states = {}
 
 -----------------------------------------------------------------------------
 -- Highlight groups
 -----------------------------------------------------------------------------
-local hl_defined = false
-
 local function define_highlights()
-  if hl_defined then
-    return
-  end
-  hl_defined = true
-
-  local col_hls = {
-    "csvCol0",
-    "csvCol1",
-    "csvCol2",
-    "csvCol3",
-    "csvCol4",
-    "csvCol5",
-    "csvCol6",
-    "csvCol7",
-    "csvCol8",
-  }
-
-  for i, hl in ipairs(col_hls) do
-    vim.api.nvim_set_hl(0, "CsvViewCol" .. (i - 1), { fg = hl.fg, bg = hl.bg, default = true })
+  for i = 0, 9 do
+    vim.api.nvim_set_hl(0, "CsvViewCol" .. i, { link = "csvCol" .. i })
   end
 
-  vim.api.nvim_set_hl(0, "CsvViewDelimiter", { fg = "#727169", default = true })
+  vim.api.nvim_set_hl(0, "CsvViewDelimiter", { link = "Comment" })
   vim.api.nvim_set_hl(0, "CsvViewHeaderLine", { bold = true, underline = true, default = true })
 end
 
 -----------------------------------------------------------------------------
 -- Utility functions
 -----------------------------------------------------------------------------
-
-local function str_display_width(str)
-  return vim.fn.strdisplaywidth(str)
-end
-
 local function is_number_str(str)
   local trimmed = str:match("^%s*(.-)%s*$")
   if trimmed == "" then
@@ -61,6 +45,7 @@ local function is_number_str(str)
   return tonumber(trimmed) ~= nil
 end
 
+---@return string
 local function buf_get_line(bufnr, lnum)
   local count = vim.api.nvim_buf_line_count(bufnr)
   if lnum < 1 or lnum > count then
@@ -70,9 +55,9 @@ local function buf_get_line(bufnr, lnum)
 end
 
 -----------------------------------------------------------------------------
--- Delimiter / quote detection
+-- Delimiter detection
 -----------------------------------------------------------------------------
-
+---@return integer
 local function count_fields_in_line(line, delim, quote_byte)
   local count = 0
   local in_quote = false
@@ -89,9 +74,12 @@ local function count_fields_in_line(line, delim, quote_byte)
       count = count + 1
     end
   end
+  -- +1 for count of fields = delimiters + 1
   return count + 1
 end
 
+--- Infer the delimiter by sampling the first few lines and scoring candidate delimiters.
+--- More fields score higer, but we alse punish when more inconsistent field counts.
 local function detect_delimiter(bufnr, quote_char)
   local n_samples = 10
   local total = vim.api.nvim_buf_line_count(bufnr)
@@ -119,6 +107,8 @@ local function detect_delimiter(bufnr, quote_char)
       end
     end
     if valid > 0 and min_c >= 2 then
+      -- bonus for more files
+      -- penalty for inconsistent fields counts
       local score = min_c * 10 - (max_c - min_c)
       if score > best_score then
         best_score = score
@@ -128,34 +118,6 @@ local function detect_delimiter(bufnr, quote_char)
   end
 
   return best_delim
-end
-
-local function detect_quote_char(bufnr)
-  local n_samples = 10
-  local total = vim.api.nvim_buf_line_count(bufnr)
-  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, math.min(n_samples, total), true)
-  local sample = table.concat(lines, "\n")
-  local best_quote, best_score = '"', -1
-
-  for _, qc in ipairs(DEFAULT_QUOTE_CHARS) do
-    local count = 0
-    local qb = qc:byte()
-    for i = 1, #sample do
-      if sample:byte(i) == qb then
-        count = count + 1
-      end
-    end
-    local score = count
-    if count > 0 and count % 2 == 0 then
-      score = score + 100
-    end
-    if score > best_score then
-      best_score = score
-      best_quote = qc
-    end
-  end
-
-  return best_quote
 end
 
 -----------------------------------------------------------------------------
@@ -172,9 +134,9 @@ end
 --   - Column widths: computed from first lines only (continuation lines have
 --     different column indices)
 -----------------------------------------------------------------------------
-
 --- Find the closing quote position in a line, starting from start_pos.
 --- Returns nil if no closing quote found (field continues to next line).
+---@return integer|nil
 local function find_closing_quote(line, start_pos, quote_byte)
   local len = #line
   local pos = start_pos
@@ -196,24 +158,18 @@ end
 ---@field offset integer       0-based byte offset in the line
 ---@field len integer          byte length in the line
 ---@field text string          raw field text from the line
----@field display_text string  text with quotes stripped (for width calculation)
 ---@field display_width integer
 ---@field is_number boolean
 
 --- Parse a single physical line into fields.
 --- Each field has offset/len relative to THIS line.
 --- Also returns has_unclosed_quote to detect multi-line records.
-local function parse_line(line, delim, quote_char)
+local function parse_line(line, delim, quote_char, continuation)
   if not line or #line == 0 then
     return {}, false
   end
 
-  local delim_bytes = {}
-  for i = 1, #delim do
-    delim_bytes[i] = delim:byte(i)
-  end
-  local delim_first = delim_bytes[1]
-  local delim_len = #delim_bytes
+  local delim_byte = delim:byte()
   local quote_byte = quote_char:byte()
 
   local fields = {} ---@type CsvField[]
@@ -222,6 +178,25 @@ local function parse_line(line, delim, quote_char)
   local len = #line
   local has_unclosed_quote = false
 
+  -- For continuation lines: find the closing quote and skip past it
+  if continuation then
+    local close_pos = find_closing_quote(line, 1, quote_byte)
+    if close_pos then
+      -- Advance past the closing quote; let the main loop find the delimiter
+      pos = close_pos + 1
+    else
+      -- No closing quote on this line — entire line continues the multi-line field
+      has_unclosed_quote = true
+      local text = line:sub(field_start)
+      local field = { offset = field_start - 1, len = len, text = text }
+      field.display_width = vim.fn.strdisplaywidth(field.text)
+      field.is_number = is_number_str(field.text)
+      table.insert(fields, field)
+      return fields, has_unclosed_quote
+    end
+  end
+
+  -- scan the line byte by byte to find delimiters and quotes
   while pos <= len do
     local b = line:byte(pos)
 
@@ -236,71 +211,34 @@ local function parse_line(line, delim, quote_char)
         has_unclosed_quote = true
         break -- stop parsing this line
       end
-    elseif b == delim_first then
-      local is_match = true
-      if delim_len > 1 then
-        for i = 2, delim_len do
-          if pos + i - 1 > len or line:byte(pos + i - 1) ~= delim_bytes[i] then
-            is_match = false
-            break
-          end
-        end
-      end
-
-      if is_match then
-        local text = line:sub(field_start, pos - 1)
-        table.insert(fields, { offset = field_start - 1, len = pos - field_start, text = text })
-        pos = pos + delim_len
-        field_start = pos
-      else
-        pos = pos + 1
-      end
+    elseif b == delim_byte then
+      local text = line:sub(field_start, pos - 1)
+      table.insert(fields, { offset = field_start - 1, len = pos - field_start, text = text })
+      pos = pos + 1
+      field_start = pos
     else
       pos = pos + 1
     end
   end
 
-  -- Final field (rest of line after last delimiter)
-  if not has_unclosed_quote then
-    local text = line:sub(field_start)
-    table.insert(fields, { offset = field_start - 1, len = #line - field_start + 1, text = text })
-  else
-    -- For multi-line start: the unclosed quoted field extends to end of line
-    -- We still record it as a field on this line (for rendering the partial text)
-    local text = line:sub(field_start)
-    table.insert(fields, { offset = field_start - 1, len = #line - field_start + 1, text = text })
-  end
+  local text = line:sub(field_start)
+  table.insert(fields, { offset = field_start - 1, len = #line - field_start + 1, text = text })
 
-  -- Compute display_text, display_width, is_number for each field
+  -- compute display_width, is_number for each field
   for _, f in ipairs(fields) do
-    local t = f.text
-    if t:sub(1, 1) == quote_char and t:sub(-1) == quote_char and #t >= 2 then
-      f.display_text = t:sub(2, -2):gsub(quote_char .. quote_char, quote_char)
-    else
-      f.display_text = t
-    end
-    f.display_width = str_display_width(f.display_text)
-    f.is_number = is_number_str(f.display_text)
+    f.display_width = vim.fn.strdisplaywidth(f.text)
+    f.is_number = is_number_str(f.text)
   end
 
   return fields, has_unclosed_quote
 end
-
------------------------------------------------------------------------------
--- Metrics
---
--- Parse all lines, detect multi-line records, compute column widths.
--- Multi-line records: when a line has an unclosed quote, subsequent lines
--- are continuation lines until we find a line with a closing quote.
---
--- Only first-line fields contribute to column widths.
------------------------------------------------------------------------------
 
 --- Detect the end of a multi-line record starting at start_lnum.
 --- Returns the line number where the multi-line record ends.
 local function find_multiline_end(bufnr, start_lnum, quote_char)
   local quote_byte = quote_char:byte()
   local total = vim.api.nvim_buf_line_count(bufnr)
+  -- No stupid csv file should have a multi-line field that long without a closing quote, right?
   local max_lookahead = 50
   local lnum = start_lnum + 1
 
@@ -321,6 +259,7 @@ local function find_multiline_end(bufnr, start_lnum, quote_char)
   return lnum - 1 -- hit lookahead limit
 end
 
+--- Parse all lines, detect multi-line records, and compute column widths for alignment.
 local function compute_metrics(bufnr, delim, quote_char)
   local total_lines = vim.api.nvim_buf_line_count(bufnr)
   local rows = {} ---@type table<integer, { fields: CsvField[], continuation: boolean, parent_lnum: integer?, skipped_ncol: integer? }>
@@ -334,7 +273,7 @@ local function compute_metrics(bufnr, delim, quote_char)
       goto continue
     end
 
-    local fields, has_unclosed_quote = parse_line(line, delim, quote_char)
+    local fields, has_unclosed_quote = parse_line(line, delim, quote_char, false)
     rows[lnum] = { fields = fields, continuation = false }
 
     if not has_unclosed_quote then
@@ -347,7 +286,6 @@ local function compute_metrics(bufnr, delim, quote_char)
       lnum = lnum + 1
     else
       -- Multi-line record: first line's fields count toward column widths
-      local n_first_line_cols = #fields
       for col_idx, f in ipairs(fields) do
         if not column_widths[col_idx] or f.display_width > column_widths[col_idx] then
           column_widths[col_idx] = f.display_width
@@ -358,12 +296,13 @@ local function compute_metrics(bufnr, delim, quote_char)
       local end_lnum = find_multiline_end(bufnr, lnum, quote_char)
 
       -- Mark continuation lines
-      local skipped = n_first_line_cols -- number of parent columns "passed"
+      local parent_col = #fields -- the multi-line field is the last column of the parent line
+      local skipped = #fields - 1
       for cl = lnum + 1, end_lnum do
         local cline = buf_get_line(bufnr, cl)
         local cfields = {}
         if cline then
-          cfields, _ = parse_line(cline, delim, quote_char)
+          cfields, _ = parse_line(cline, delim, quote_char, true)
         end
         rows[cl] = {
           fields = cfields,
@@ -371,8 +310,15 @@ local function compute_metrics(bufnr, delim, quote_char)
           parent_lnum = lnum,
           skipped_ncol = skipped,
         }
-        -- Continuation line fields do NOT contribute to column widths
-        -- (they have different column indices in the multi-line context)
+        -- All fields of a continuation line contribute to column widths.
+        -- The first field continues the multi-line field (parent_col),
+        -- subsequent fields start new columns after it.
+        for fidx, cf in ipairs(cfields) do
+          local col = parent_col + fidx - 1
+          if not column_widths[col] or cf.display_width > column_widths[col] then
+            column_widths[col] = cf.display_width
+          end
+        end
         skipped = skipped + math.max(0, #cfields - 1)
       end
 
@@ -391,7 +337,6 @@ end
 -----------------------------------------------------------------------------
 -- Renderer
 -----------------------------------------------------------------------------
-
 local function add_extmark(state, bufnr, line, col, opts)
   local id = vim.api.nvim_buf_set_extmark(bufnr, NS, line - 1, col, opts)
   if not state.extmarks[line] then
@@ -407,7 +352,8 @@ local function get_align_direction(field)
 end
 
 --- Render a single field: virtual padding + highlight + delimiter
-local function render_field(state, bufnr, lnum, col_idx, field, fields, column_widths)
+local function render_field(state, bufnr, lnum, col_idx, field, fields, column_widths, field_idx)
+  field_idx = field_idx or col_idx
   local col_width = column_widths[col_idx]
   if not col_width then
     return
@@ -417,10 +363,9 @@ local function render_field(state, bufnr, lnum, col_idx, field, fields, column_w
   local align_dir = get_align_direction(field)
   local align_padding = col_width - field.display_width
 
-  -- Spacing: 1 space gap between delimiter and field
-  local spacing = 1
-  local before_padding = spacing
-  local after_padding = spacing
+  -- Spacing: configurable gap between delimiter and field
+  local before_padding = config.left_spacing
+  local after_padding = config.right_spacing
 
   -- First field on the line: no leading spacing (no previous delimiter)
   if field.offset == 0 then
@@ -459,12 +404,12 @@ local function render_field(state, bufnr, lnum, col_idx, field, fields, column_w
   })
 
   -- Delimiter after this field (unless last)
-  if col_idx < #fields then
-    local next_field = fields[col_idx + 1]
+  if field_idx < #fields then
+    local next_field = fields[field_idx + 1]
     add_extmark(state, bufnr, lnum, field.offset + field.len, {
       hl_group = "CsvViewDelimiter",
       end_col = next_field.offset,
-      conceal = BORDER_CHAR,
+      conceal = config.border_char,
     })
   end
 end
@@ -481,23 +426,21 @@ local function render_line(state, bufnr, lnum, metrics)
     return
   end
 
-  -- Continuation line: only add left-padding, no field rendering
+  -- Continuation line: add left-padding, then render fields
   if row.continuation then
     local skipped = row.skipped_ncol or 0
     if skipped > 0 then
-      -- Calculate padding width for all skipped parent columns
-      -- padding = col1_width + sum(col_i_width + 2 + BORDER_WIDTH for i=2..skipped)
-      -- col1_width has no left spacing (it's the first column)
       local pad = 0
       for i = 1, skipped do
         local w = metrics.column_widths[i] or 1
         w = math.max(w, 1)
         if i == 1 then
-          pad = pad + w + 1 -- col_width + right spacing
+          pad = pad + w + config.right_spacing + 1 -- col_width + right spacing + boder
         else
-          pad = pad + w + 2 + BORDER_CHAR_WIDTH -- left_spacing + col_width + right_spacing + border
+          pad = pad + config.left_spacing + w + config.right_spacing + 1 -- left_spacing + col_width + right_spacing + border
         end
       end
+      pad = pad + config.left_spacing
       if pad > 0 then
         add_extmark(state, bufnr, lnum, 0, {
           virt_text = { { string.rep(" ", pad) } },
@@ -505,6 +448,12 @@ local function render_line(state, bufnr, lnum, metrics)
           right_gravity = false,
         })
       end
+    end
+    -- Render continuation fields starting from column (skipped + 1)
+    local fields = row.fields
+    for field_idx, field in ipairs(fields) do
+      local col_idx = skipped + field_idx
+      render_field(state, bufnr, lnum, col_idx, field, fields, metrics.column_widths, field_idx)
     end
     state.rendered[lnum] = true
     return
@@ -538,6 +487,7 @@ local function render_visible(state, bufnr, metrics)
   local top = vim.fn.line("w0", winid)
   local bot = vim.fn.line("w$", winid)
 
+  -- only render the visible lines on screen
   for lnum = top, bot do
     render_line(state, bufnr, lnum, metrics)
   end
@@ -546,7 +496,6 @@ end
 -----------------------------------------------------------------------------
 -- Column navigation
 -----------------------------------------------------------------------------
-
 --- Find the field index (1-based) that contains the given column position
 local function find_field_index(fields, col)
   local idx = 1
@@ -616,7 +565,6 @@ end
 -----------------------------------------------------------------------------
 -- Enable / Disable
 -----------------------------------------------------------------------------
-
 local function clear_rendering(bufnr, state)
   vim.api.nvim_buf_clear_namespace(bufnr, NS, 0, -1)
   state.extmarks = {}
@@ -643,7 +591,7 @@ local function enable(bufnr)
 
   define_highlights()
 
-  local quote_char = detect_quote_char(bufnr)
+  local quote_char = DEFAULT_QUOTE_CHAR
   local delim = detect_delimiter(bufnr, quote_char)
   local metrics = compute_metrics(bufnr, delim, quote_char)
 
@@ -689,20 +637,9 @@ local function disable(bufnr)
   state.metrics = nil
 end
 
-local function toggle(bufnr)
-  bufnr = bufnr or vim.api.nvim_get_current_buf()
-  local state = buffer_states[bufnr]
-  if state and state.enabled then
-    disable(bufnr)
-  else
-    enable(bufnr)
-  end
-end
-
 -----------------------------------------------------------------------------
 -- Autocommands
 -----------------------------------------------------------------------------
-
 local augroup = vim.api.nvim_create_augroup("CsvViewStandalone", { clear = true })
 
 vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
@@ -755,14 +692,26 @@ vim.api.nvim_create_autocmd({ "BufDelete", "BufUnload" }, {
   end,
 })
 
-vim.api.nvim_create_user_command("CSVViewToggle", function()
-  toggle()
+-----------------------------------------------------------------------------
+-- API
+-----------------------------------------------------------------------------
+vim.api.nvim_create_user_command("CsvViewToggle", function()
+  M.toggle()
 end, { desc = "Toggle CSV table view for current buffer" })
 
 function M.setup(opts)
-  opts = opts or {}
+  config = vim.tbl_deep_extend("force", config, opts or {})
+  enable()
 end
 
-toggle()
+function M.toggle(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  local state = buffer_states[bufnr]
+  if state and state.enabled then
+    disable(bufnr)
+  else
+    enable(bufnr)
+  end
+end
 
 return M
