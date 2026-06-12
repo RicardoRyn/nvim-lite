@@ -78,11 +78,11 @@ vim.keymap.set("n", "<leader>z", function() Snacks.picker.zoxide() end, { desc =
 -- LSP
 vim.keymap.set("n", "<leader>ss", function() Snacks.picker.lsp_symbols() end, { desc = "Search LSP symbols" })
 vim.keymap.set("n", "<leader>sS", function() Snacks.picker.lsp_workspace_symbols() end, { desc = "Search LSP Symbols in workspace" })
-vim.keymap.set("n", "gd", function() Snacks.picker.lsp_definitions() end, { desc = "Goto Definition" })
-vim.keymap.set("n", "gD", function() Snacks.picker.lsp_declarations() end, { desc = "Goto Declaration" })
-vim.keymap.set("n", "gr", function() Snacks.picker.lsp_references() end, { nowait = true, desc = "References" })
-vim.keymap.set("n", "gI", function() Snacks.picker.lsp_implementations() end, { desc = "Goto Implementation" })
-vim.keymap.set("n", "gy", function() Snacks.picker.lsp_type_definitions() end, { desc = "Goto T[y]pe Definition" })
+vim.keymap.set("n", "gd", function() Snacks.picker.lsp_definitions() end, { desc = "Snacks goto definition" })
+vim.keymap.set("n", "gD", function() Snacks.picker.lsp_declarations() end, { desc = "Snacks goto declaration" })
+vim.keymap.set("n", "grr", function() Snacks.picker.lsp_references() end, { nowait = true, desc = "Snacks goto references" })
+vim.keymap.set("n", "gri", function() Snacks.picker.lsp_implementations() end, { desc = "Snacks goto implementation" })
+vim.keymap.set("n", "grt", function() Snacks.picker.lsp_type_definitions() end, { desc = "Snacks goto type definition" })
 -- git
 vim.keymap.set("n", "<leader>ghi", function() Snacks.picker.gh_issue() end, { desc = "GitHub Issues (open)" })
 vim.keymap.set("n", "<leader>ghI", function() Snacks.picker.gh_issue({ state = "all" }) end, { desc = "GitHub Issues (all)" })

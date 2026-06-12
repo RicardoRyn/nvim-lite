@@ -56,6 +56,7 @@ local M = {
     mode_color = function(mode)
       return ({
         n = colors.blue,
+        no = colors.yellow,
         nt = colors.blue,
         i = colors.green,
         ic = colors.green,
@@ -67,6 +68,8 @@ local M = {
         S = colors.purple,
         ["\19"] = colors.purple,
         R = colors.red,
+        Rv = colors.red,
+        Rvc = colors.red,
         r = colors.red,
         ["!"] = colors.green,
         t = colors.green,
