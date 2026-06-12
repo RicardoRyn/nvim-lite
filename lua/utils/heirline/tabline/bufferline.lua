@@ -7,9 +7,9 @@ local TablineBufnr = {
   provider = function(self)
     local ok, ba = pcall(require, "utils.buffer_actions")
     if ok and ba.is_picking then
-      return ba.pick_labels[self.bufnr] .. "."
+      return ba.pick_labels[self.bufnr] .. ". "
     else
-      return tostring(self.bufnr) .. "."
+      return tostring(self.bufnr) .. ". "
     end
   end,
   hl = function()
