@@ -544,6 +544,76 @@ local function render_visible(state, bufnr, metrics)
 end
 
 -----------------------------------------------------------------------------
+-- Column navigation
+-----------------------------------------------------------------------------
+
+--- Find the field index (1-based) that contains the given column position
+local function find_field_index(fields, col)
+  local idx = 1
+  for i = #fields, 1, -1 do
+    if col >= fields[i].offset then
+      idx = i
+      break
+    end
+  end
+  return idx
+end
+
+--- Navigate to the next field in the current row
+local function goto_next_field()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local state = buffer_states[bufnr]
+  if not state or not state.enabled or not state.metrics then
+    return
+  end
+
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local lnum = cursor[1]
+  local col = cursor[2] -- 0-based column
+
+  local row = state.metrics.rows[lnum]
+  if not row or row.continuation or #row.fields == 0 then
+    return
+  end
+
+  local fields = row.fields
+  local current_idx = find_field_index(fields, col)
+
+  -- Move to next field
+  if current_idx < #fields then
+    local next_field = fields[current_idx + 1]
+    vim.api.nvim_win_set_cursor(0, { lnum, next_field.offset })
+  end
+end
+
+--- Navigate to the previous field in the current row
+local function goto_prev_field()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local state = buffer_states[bufnr]
+  if not state or not state.enabled or not state.metrics then
+    return
+  end
+
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local lnum = cursor[1]
+  local col = cursor[2] -- 0-based column
+
+  local row = state.metrics.rows[lnum]
+  if not row or row.continuation or #row.fields == 0 then
+    return
+  end
+
+  local fields = row.fields
+  local current_idx = find_field_index(fields, col)
+
+  -- Move to previous field
+  if current_idx > 1 then
+    local prev_field = fields[current_idx - 1]
+    vim.api.nvim_win_set_cursor(0, { lnum, prev_field.offset })
+  end
+end
+
+-----------------------------------------------------------------------------
 -- Enable / Disable
 -----------------------------------------------------------------------------
 
@@ -591,6 +661,10 @@ local function enable(bufnr)
     setup_window(winid, true)
   end
 
+  -- Setup keybindings
+  vim.keymap.set({ "n", "i" }, "<Tab>", goto_next_field, { buffer = bufnr, desc = "Go to next CSV field" })
+  vim.keymap.set({ "n", "i" }, "<S-Tab>", goto_prev_field, { buffer = bufnr, desc = "Go to previous CSV field" })
+
   render_visible(state, bufnr, metrics)
 end
 
@@ -602,6 +676,10 @@ local function disable(bufnr)
   end
 
   clear_rendering(bufnr, state)
+
+  -- Remove keybindings
+  pcall(vim.keymap.del, { "n", "i" }, "<Tab>", { buffer = bufnr })
+  pcall(vim.keymap.del, { "n", "i" }, "<S-Tab>", { buffer = bufnr })
 
   for _, winid in ipairs(vim.fn.win_findbuf(bufnr)) do
     setup_window(winid, false)
