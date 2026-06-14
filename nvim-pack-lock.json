@@ -1,7 +1,7 @@
 {
   "plugins": {
     "catppuccin": {
-      "rev": "0303a7208dba448c459767486a38a6ec05c4216b",
+      "rev": "49a926655a2f5579e9c276470fc300baaa49e524",
       "src": "https://github.com/catppuccin/nvim"
     },
     "conform.nvim": {
@@ -31,6 +31,10 @@
     "mason.nvim": {
       "rev": "2a6940af80375532e5e9e7c1f2fc6319a1b7a69d",
       "src": "https://github.com/mason-org/mason.nvim"
+    },
+    "mini.ai": {
+      "rev": "4511b3481707c1d021485475d34f2ed2a50bf47b",
+      "src": "https://github.com/nvim-mini/mini.ai"
     },
     "mini.clue": {
       "rev": "4b3db71003fa06200680afb9f1d05506b79eb953",

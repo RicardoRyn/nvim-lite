@@ -2,6 +2,7 @@ local active_specs = {
   --core
   { src = "https://github.com/catppuccin/nvim", name = "catppuccin" },
   { src = "https://github.com/mason-org/mason.nvim" },
+  { src = "https://github.com/nvim-mini/mini.ai" },
   { src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects" },
   { src = "https://github.com/neovim-treesitter/nvim-treesitter" },
   { src = "https://github.com/folke/snacks.nvim" },
@@ -38,7 +39,8 @@ local active_specs = {
   { src = "https://github.com/neovim-treesitter/treesitter-parser-registry" },
 }
 
-local disabled_specs = {}
+local disabled_specs = {
+}
 
 local function get_names_from_vimpack(arg_lead)
   local installed = vim.pack.get(nil, { info = false })

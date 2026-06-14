@@ -102,7 +102,6 @@ vim.api.nvim_create_autocmd("FileType", {
     "startuptime",
     "tsplayground",
     "dap-float",
-    "nvim-pack",
   },
   callback = function(event)
     vim.bo[event.buf].buflisted = false
